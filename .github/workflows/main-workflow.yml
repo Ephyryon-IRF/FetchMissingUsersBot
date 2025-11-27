@@ -37,9 +37,9 @@ jobs:
       env:
         GH_PAT: ${{ secrets.GH_PAT }}
       run: |
-        git config --global user.email "jonatangrondahl@outlook.com"
-        git config --global user.name "JonatanVG"
+        git config --global user.email "ephyryon.irf@gmail.com"
+        git config --global user.name "Ephyryon-IRF"
         git add "registered_guilds.json"
         git commit -m "Update JSON data files"
-        git push https://$GH_PAT@github.com/JonatanVG/bot-template.git main
+        git push https://$GH_PAT@github.com/Ephyryon-IRF/FetchMissingUsersBot.git main
       continue-on-error: True
