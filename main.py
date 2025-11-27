@@ -1,10 +1,7 @@
 ### Import all basic required libraries.
 import discord # Import Discord library
-from discord import app_commands # Will be needed if you're planning on making / commands
-from discord.ext import commands, tasks # You need commands, but tasks is only necessary if you want it to for an example execute a function once every 1 hour.
+from discord.ext import commands
 import os # Import os library
-import sys # Import sys library
-import json # Import json library
 from dotenv import load_dotenv # Change import dotenv to this instead.
 ### End import libraries.
 
@@ -18,6 +15,7 @@ from guild_funcs.guild_owner_only import guild_owner_only
 
 
 token = os.getenv("BOT_TOKEN") # Write this to access your bots token.
+api_key = os.getenv("API_KEY") # Write this to access your Google Sheets API key.
 
 
 ### Import bot
