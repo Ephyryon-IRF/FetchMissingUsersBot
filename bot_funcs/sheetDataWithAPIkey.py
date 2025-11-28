@@ -35,11 +35,11 @@ async def fetchSheetData(spreadsheet_id, api_key, sheet_name="Sheet1"):
                     for entry in usersAndRoles:
                         if entry['username'] == username:
                             print(f"Duplicate username found: {username} at row {i}. Skipping entry.")
-                            duplicates.append(f"Duplicate {username} at row '{i}'")
+                            duplicates.append(f"In {sheet_name}: Duplicate {username} at row '{i}'")
                             continue
-                        elif entry['username'] == "":
+                        elif entry['username'] == "" or entry['username'] is None:
                             print(f"Empty username found at row {i}. Skipping entry.")
-                            duplicates.append(f"Empty username at row '{i}'")
+                            duplicates.append(f"In {sheet_name}: Empty username at row '{i}'")
                             continue
                     usersAndRoles.append({
                         "row": i,
@@ -62,11 +62,22 @@ async def fetchSheetData(spreadsheet_id, api_key, sheet_name="Sheet1"):
     
 async def mainISheet():
     spreadsheet_id = "1hzRzEdmCUdktzFXEhiM3JeTBDCOEwoTw8Bx2PZavL9M"
-    sheet_name = "Personnel | Database"
+    sheet_names = [
+        "Personnel | Database",
+        "Staff | Database",
+    ]
     api_key = os.getenv("API_KEY")
-    
-    data, duplicates = await fetchSheetData(spreadsheet_id, api_key, sheet_name)
 
+    data = []
+    duplicates = []
+    
+    for sheet_name in sheet_names:
+        print(f"Fetching data from sheet: {sheet_name}")
+        sheet_data, sheet_duplicates = await fetchSheetData(spreadsheet_id, api_key, sheet_name)
+        if sheet_data:
+            data.extend(sheet_data)
+        if sheet_duplicates:
+            duplicates.extend(sheet_duplicates)
     if data is not None:
         role_counts = Counter(entry['role'] for entry in data)
         print("\nRole Distribution:")

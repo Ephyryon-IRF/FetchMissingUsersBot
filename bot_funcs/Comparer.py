@@ -7,9 +7,13 @@ async def Comparer():
     count = 0
     userNotInDatabase = {}
     for role, members in group_data['membersByRole'].items():
-        notInDatabaseUsers = [m for m in members if all(m['username'] != entry['username'] for entry in sheet_data)]
+        notInDatabaseUsers = [
+            m for m in members 
+            if all(m['username'] != entry['username'] for entry in sheet_data)
+            and not (m['roleName'] == "Party Chairman" and m['username'] != ["Penkuvsky"])
+        ]
         if notInDatabaseUsers:
-            if role not in ["Initiate", "Advocate"]:
+            if role in ["Owner", "Guest", "Party Supporter", "Holder"]:
                 print(f"\nSkipping role: {role}")
                 notInDatabaseUsers.clear()
                 continue
