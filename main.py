@@ -8,7 +8,7 @@ from dotenv import load_dotenv # Change import dotenv to this instead.
 load_dotenv() # Makes the code able to read the .env file.
 
 ### Import guild functions
-from guild_funcs.register_role_with_guild import registered_guilds
+from guild_funcs.register_role_with_guild import registered_guilds, register_role_with_guild
 from guild_funcs.has_correct_roles import has_correct_roles
 from guild_funcs.guild_owner_only import guild_owner_only
 ### End of import guild functions
@@ -44,6 +44,7 @@ async def on_ready(): # This runs automatically when your bot starts.
 @bot.event
 async def on_guild_join(guild):
     registered_guilds[str(guild.id)] = {"role_perms": []} # Adds the guild to it's register.
+    register_role_with_guild()
     print(f"Added guild {guild.name} ({guild.id}) to registered_guilds.")
     print(registered_guilds)
 
@@ -61,7 +62,6 @@ async def on_guild_remove(guild):
 ## Compare: Compares the group members with the sheet data and returns users not in the database.
 import bot_funcs.Comparison
 @bot.command(name="compare")
-@has_correct_roles(registered_guilds)
 async def compare(ctx, name: str = ""):
     if bot.user.name == name:
         result = await bot_funcs.Comparison.Comparison()
@@ -70,7 +70,6 @@ async def compare(ctx, name: str = ""):
         None
 ## Slash command version of compare
 @bot.tree.command(name="compare", description="Compares the group members with the sheet data and returns users not in the database.")
-@has_correct_roles(registered_guilds)
 async def compare_interaction(interaction: discord.Interaction):
     await interaction.response.send_message("Processing comparison, please wait...")
     result = await bot_funcs.Comparison.Comparison()
