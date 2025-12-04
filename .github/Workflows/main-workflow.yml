@@ -1,0 +1,45 @@
+name: Main Workflow # Name of the workflow
+
+on: # Trigger the workflow on push to main branch or manual dispatch
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest # Use the latest Ubuntu runner
+
+    steps: # Define the steps of the job
+    - name: Checkout code # Checkout the repository code
+      uses: actions/checkout@v2
+
+    - name: Set up Python # Set up Python environment
+      uses: actions/setup-python@v2
+      with: # Specify the Python version to use
+        python-version: 3.12.5
+
+    - name: Install dependencies # Dependency Installation
+      run: | # Upgrade pip and install required packages
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run bot # Main Script Execution
+      env:
+        BOT_TOKEN: ${{ secrets.BOT_TOKEN }} # Bot token for authentication
+        API_KEY: ${{ secrets.API_KEY }} # API key for external service
+      run: python main.py # Execute the main bot script
+      timeout-minutes: 330 # Set a timeout of 5.5 hours
+      continue-on-error: True # Continue even if this step fails
+
+    - name: Commit and Push Changes # Commit and push any changes made by the bot
+      if: always() # Always run this step
+      env: # Environment variables for authentication
+        GH_PAT: ${{ secrets.GH_PAT }} # GitHub Personal Access Token
+      run: | # Configure git and push changes
+        git config --global user.email "ephyryon.irf@gmail.com"
+        git config --global user.name "Ephyryon-IRF"
+        git add "registered_guilds.json"
+        git commit -m "Update JSON data files"
+        git push https://$GH_PAT@github.com/Ephyryon-IRF/FetchMissingUsersBot.git main
+      continue-on-error: True
