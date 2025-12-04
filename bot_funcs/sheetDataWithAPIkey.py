@@ -14,8 +14,8 @@ async def timer():
         cooldown -= 1
     print("Retrying now...            ")
 
-async def fetchSheetData(spreadsheet_id, api_key, sheet_name="Sheet1"):
-    range_name = f"{sheet_name}!D10:E200"
+async def fetchSheetData(spreadsheet_id, api_key, sheet_name: str, parameters: str, start_row: int):
+    range_name = f"{sheet_name}!{parameters}"
     url = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheet_id}/values/{range_name}?key={api_key}"
 
     print(f"Fetching data from URL: {url}")
@@ -28,18 +28,18 @@ async def fetchSheetData(spreadsheet_id, api_key, sheet_name="Sheet1"):
 
         if 'values' in data:
             print("Data fetched successfully. Processing rows...")
-            for i, row in enumerate(data['values'], start=10):
+            for i, row in enumerate(data['values'], start=start_row):
                 if len(row) >= 1 and row[0] and row[0].strip():
                     username = row[0].strip()
                     role = row[1].strip() if len(row) > 1 and row[1] else "Guest"
                     for entry in usersAndRoles:
                         if entry['username'] == username:
                             print(f"Duplicate username found: {username} at row {i}. Skipping entry.")
-                            duplicates.append(f"Duplicate {username} at row '{i}'")
+                            duplicates.append(f"In {sheet_name}: Duplicate {username} at row '{i}'")
                             continue
-                        elif entry['username'] == "":
+                        elif entry['username'] == "" or entry['username'] is None:
                             print(f"Empty username found at row {i}. Skipping entry.")
-                            duplicates.append(f"Empty username at row '{i}'")
+                            duplicates.append(f"In {sheet_name}: Empty username at row '{i}'")
                             continue
                     usersAndRoles.append({
                         "row": i,
@@ -60,13 +60,23 @@ async def fetchSheetData(spreadsheet_id, api_key, sheet_name="Sheet1"):
         print(f"Error {response.status_code}: {response.text}")
         return None
     
-async def mainISheet():
-    spreadsheet_id = "1hzRzEdmCUdktzFXEhiM3JeTBDCOEwoTw8Bx2PZavL9M"
-    sheet_name = "Personnel | Database"
+async def mainISheet(spreadsheet_id: str, parameters: str, start_row: int):
+    sheet_names = [
+        "Personnel | Database",
+        "Staff | Database",
+    ]
     api_key = os.getenv("API_KEY")
-    
-    data, duplicates = await fetchSheetData(spreadsheet_id, api_key, sheet_name)
 
+    data = []
+    duplicates = []
+    
+    for sheet_name in sheet_names:
+        print(f"Fetching data from sheet: {sheet_name}")
+        sheet_data, sheet_duplicates = await fetchSheetData(spreadsheet_id, api_key, sheet_name, parameters, start_row)
+        if sheet_data:
+            data.extend(sheet_data)
+        if sheet_duplicates:
+            duplicates.extend(sheet_duplicates)
     if data is not None:
         role_counts = Counter(entry['role'] for entry in data)
         print("\nRole Distribution:")

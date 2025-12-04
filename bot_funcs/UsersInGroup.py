@@ -1,7 +1,6 @@
 import requests
 import time
 
-# Get roles mapping for the group
 def getGroupRoles(target):
     url = f"https://groups.roblox.com/v1/groups/{target}/roles"
     response = requests.get(url)
@@ -9,12 +8,10 @@ def getGroupRoles(target):
         print(f"Error fetching roles: {response.status_code}")
         return None
     
-    # Parse roles
     data = response.json()
     return {role['rank']: role['name'] for role in data['roles']}
 
-def getGroupMembers():
-    target = 5267416
+def getGroupMembers(target):
     members = []
     cursor = None
     role_map = getGroupRoles(target)
@@ -92,7 +89,7 @@ def mainIGroup(target):
     print(f"Target Group ID: {target}")
     print("Starting member fetch...")
 
-    members = getGroupMembers()
+    members = getGroupMembers(target)
     if not members:
         print("Failed to retrieve group data.")
         return

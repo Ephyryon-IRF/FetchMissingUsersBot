@@ -63,20 +63,25 @@ async def on_guild_remove(guild):
 ## Compare: Compares the group members with the sheet data and returns users not in the database.
 import bot_funcs.Comparison
 @bot.command(name="compare")
-@has_correct_roles(registered_guilds)
 async def compare(ctx, name: str = ""):
     if bot.user.name == name:
-        result = await bot_funcs.Comparison.Comparison()
-        await ctx.send(f"**Users not in database:**\n{result}")
+        result, Names = await bot_funcs.Comparison.Comparison()
+        if result is None:
+            await ctx.send("This bot can only be used in specific guilds. Please contact the bot administrator for more information.")
+            return
+        await ctx.send(f"**Users not in database:**\n{result}\n\n**Usernames:**\n{Names}")
     else:
         None
 ## Slash command version of compare
 @bot.tree.command(name="compare", description="Compares the group members with the sheet data and returns users not in the database.")
-@has_correct_roles(registered_guilds)
-async def compare_interaction(interaction: discord.Interaction):
-    await interaction.response.send_message("Processing comparison, please wait...")
-    result = await bot_funcs.Comparison.Comparison()
-    await interaction.channel.send(f"**Users not in database:**\n{result}")
+async def compare_interaction(inter: discord.Interaction):
+    await inter.response.send_message("Processing comparison, please wait...")
+    guild_id = inter.guild_id
+    result, Names = await bot_funcs.Comparison.Comparison(guild_id)
+    if result is None:
+        await inter.channel.send("This bot can only be used in specific guilds. Please contact the bot administrator for more information.")
+        return
+    await inter.channel.send(f"**Users not in database:**\n{result}\n\n**Usernames:**\n{Names}")
 ### Bot commands end
 
 

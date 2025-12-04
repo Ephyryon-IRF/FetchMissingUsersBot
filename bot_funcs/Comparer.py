@@ -1,15 +1,20 @@
 from bot_funcs.sheetDataWithAPIkey import mainISheet
 from bot_funcs.UsersInGroup import mainIGroup
 
-async def Comparer():
-    sheet_data, duplicates = await mainISheet()
-    group_data = mainIGroup(5267416)
+async def Comparer(guild: dict[str, any]):
+    sheet_data, duplicates = await mainISheet(guild["sheet"], guild["parameters"], guild["start_row"])
+    group_data = mainIGroup(guild["group"])
     count = 0
     userNotInDatabase = {}
     for role, members in group_data['membersByRole'].items():
-        notInDatabaseUsers = [m for m in members if all(m['username'] != entry['username'] for entry in sheet_data)]
+        notInDatabaseUsers = [
+            m for m in members 
+            if all(m['username'] != entry['username'] for entry in sheet_data)
+            and not (m['roleName'] == "Party Chairman" and m['username'] != ["Penkuvsky"])
+            and not (m['roleName'] == "Commander" and m['username'] != ["SpeeD5y"])
+        ]
         if notInDatabaseUsers:
-            if role not in ["Initiate", "Advocate"]:
+            if role in ["Owner", "Guest", "Party Supporter", "Holder", "Group Holder", "Supreme Marshal", "Chief Marshal", "Consul Marshal", "Marshal of the Mechanized Army", "Tsardom"]:
                 print(f"\nSkipping role: {role}")
                 notInDatabaseUsers.clear()
                 continue
