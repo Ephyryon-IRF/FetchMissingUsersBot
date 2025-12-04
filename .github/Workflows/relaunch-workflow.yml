@@ -9,7 +9,7 @@ on: # Triggered when the Main Workflow completes
 jobs:
   redeploy: # Job to check logs and potentially relaunch the Main Workflow
     runs-on: ubuntu-latest
-    if: ${{ always() }} # Always run to check logs even if the Main Workflow failed
+    if: ${{ always() }}
     env: # Set GitHub PAT for authentication
       GH_PAT: ${{ secrets.GH_PAT }}
     steps: # Steps to check logs and relaunch workflow

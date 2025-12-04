@@ -33,7 +33,7 @@ jobs:
       continue-on-error: True # Continue even if this step fails
 
     - name: Commit and Push Changes # Commit and push any changes made by the bot
-      if: always() # Always run this step
+      if: always()
       env: # Environment variables for authentication
         GH_PAT: ${{ secrets.GH_PAT }} # GitHub Personal Access Token
       run: | # Configure git and push changes
