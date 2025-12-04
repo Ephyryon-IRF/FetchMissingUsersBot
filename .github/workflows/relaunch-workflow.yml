@@ -1,0 +1,43 @@
+name: Relaunch Workflow
+
+on: # Triggered when the Main Workflow completes
+  workflow_run:
+    workflows: ["Main Workflow"]
+    types:
+      - completed
+
+jobs:
+  redeploy: # Job to check logs and potentially relaunch the Main Workflow
+    runs-on: ubuntu-latest
+    if: ${{ always() }} # Always run to check logs even if the Main Workflow failed
+    env: # Set GitHub PAT for authentication
+      GH_PAT: ${{ secrets.GH_PAT }}
+    steps: # Steps to check logs and relaunch workflow
+      - name: Checkout code # Checkout the repository code
+        uses: actions/checkout@v2
+
+      - name: Set up GitHub CLI # Install GitHub CLI for interacting with GitHub
+        run: | # Install GitHub CLI
+          echo "${{ secrets.GH_PAT }}" | gh auth login --with-token
+        env: # Set GitHub PAT for authentication
+          GH_PAT: ${{ secrets.GH_PAT }}
+
+      - name: Check for "Shutting down..." in Main Workflow logs # Check logs for specific message
+        id: check_logs
+        run: | # Fetch logs and search for the shutdown message
+          LOG_OUTPUT=$(gh run view $(gh run list --workflow="Main Workflow" --json databaseId --jq '.[0].databaseId') --log)
+          echo "$LOG_OUTPUT"
+          if echo "$LOG_OUTPUT" | grep -q "Shutting down..."; then
+            echo "shutdown_found=true" >> $GITHUB_ENV
+          else
+            echo "shutdown_found=false" >> $GITHUB_ENV
+          fi
+        env: # Set GitHub PAT for authentication
+          GH_PAT: ${{ secrets.GH_PAT }}
+
+      - name: Trigger Main Workflow # Relaunch Main Workflow if shutdown message not found
+        if: env.shutdown_found == 'false'
+        run: | # Relaunch the Main Workflow
+          gh workflow run "Main Workflow"
+        env: # Set GitHub PAT for authentication
+          GH_PAT: ${{ secrets.GH_PAT }}
