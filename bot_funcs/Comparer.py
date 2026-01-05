@@ -9,9 +9,8 @@ async def Comparer(guild: dict[str, any]):
     for role, members in group_data['membersByRole'].items():
         notInDatabaseUsers = [
             m for m in members 
-            if all(m['username'] != entry['username'] for entry in sheet_data)
-            and not (m['roleName'] == "Party Chairman" and m['username'] != ["Penkuvsky"])
-            and not (m['roleName'] == "Commander" and m['username'] != ["SpeeD5y"])
+            if all(m['username'].lower() != entry['username'].lower() for entry in sheet_data)
+            and not (m['username'] in ["Federation_Managment", "ClanLabs40", "CLBot10"])
         ]
         if notInDatabaseUsers:
             if role in ["Owner", "Guest", "Party Supporter", "Holder", "Group Holder", "Supreme Marshal", "Chief Marshal", "Consul Marshal", "Marshal of the Mechanized Army", "Tsardom"]:
